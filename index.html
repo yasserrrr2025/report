@@ -52,29 +52,15 @@ html,body{
   z-index:10;
 }
 
-/* ✅ الأزرار: يمين أعلى + حاوية أنيقة */
+/* زر PDF داخل الهيدر (لا يُطبع) */
 .header-action{
-  position:absolute;
-  top:10px;
-  right:12px;
-  left:auto;
-  z-index:20;
-  display:flex;
-  gap:8px;
-  align-items:center;
-
-  padding:6px;
-  border-radius:16px;
-  background:rgba(0,0,0,.15);
-  backdrop-filter: blur(6px) saturate(140%);
-  border:1px solid rgba(255,255,255,.18);
+  position:absolute; top:10px; left:12px; z-index:20;
 }
-
 .pdf-chip{
   display:inline-flex; align-items:center; gap:8px;
-  padding:8px 12px; border-radius:12px;
+  padding:10px 14px; border-radius:14px;
   background:linear-gradient(180deg, var(--accent), var(--accentDeep));
-  color:#fff; font-weight:900; letter-spacing:.4px;
+  color:#fff; font-weight:800; letter-spacing:.6px;
   border:1px solid rgba(255,255,255,.25);
   box-shadow:0 10px 22px rgba(14,59,70,.25), inset 0 1px 0 rgba(255,255,255,.18);
   cursor:pointer; user-select:none;
@@ -85,26 +71,9 @@ html,body{
 .pdf-chip:hover{filter:brightness(1.05); box-shadow:0 12px 26px rgba(14,59,70,.35);}
 .pdf-chip:active{transform:translateY(1px)}
 .pdf-chip::after{
-  content:""; position:absolute; inset:-2px; border-radius:14px; pointer-events:none;
+  content:""; position:absolute; inset:-2px; border-radius:16px; pointer-events:none;
   background:radial-gradient(24px 24px at 85% 30%, rgba(255,255,255,.35), transparent 60%);
 }
-
-/* زر الطباعة المباشرة */
-.print-chip{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:8px 12px; border-radius:12px;
-  background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
-  color:#fff; font-weight:900; letter-spacing:.4px;
-  border:1px solid rgba(255,255,255,.28);
-  box-shadow:0 10px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
-  cursor:pointer; user-select:none;
-  transition:transform .08s ease, filter .2s ease, box-shadow .2s ease;
-  position:relative;
-  backdrop-filter: blur(6px) saturate(140%);
-}
-.print-chip svg{width:18px; height:18px; flex:0 0 18px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
-.print-chip:hover{filter:brightness(1.06); box-shadow:0 12px 26px rgba(0,0,0,.22);}
-.print-chip:active{transform:translateY(1px)}
 
 /* المحتوى */
 .main{padding:0 10mm; display:flex; flex-direction:column; min-height:0}
@@ -237,41 +206,15 @@ html,body{
     transform-origin:top center;
   }
 }
-
-/* ✅ طباعة: ضمان ظهور التذييل + منع القص */
 @media print{
-  html, body{
-    background:#fff !important;
-    margin:0 !important;
-    padding:0 !important;
-  }
-
   .sheet{
     transform:none !important;
-    width:210mm !important;
-    height:297mm !important;
-    margin:0 !important;
-    border:none !important;
-    box-shadow:none !important;
-    overflow:visible !important;  /* ✅ بدل hidden */
-    position:relative !important;
+    width:210mm;
+    height:297mm;
+    margin:0;
+    box-shadow:none;
+    border:none;
   }
-
-  .footer-bar{
-    position:fixed !important;
-    left:0 !important;
-    right:0 !important;
-    bottom:0 !important;
-    height:6mm !important;
-    background:var(--footer) !important;
-    print-color-adjust: exact !important;
-    -webkit-print-color-adjust: exact !important;
-  }
-
-  /* مساحة آمنة حتى لا يغطي التذييل آخر عنصر */
-  .main{ padding-bottom:10mm !important; }
-
-  /* إخفاء الأزرار في الطباعة */
   .header-action{display:none !important;}
 }
 </style>
@@ -282,6 +225,7 @@ html,body{
 <div class="sheet" id="sheet">
   <!-- الهيدر -->
   <div class="header-img">
+    <!-- ✅ الهيدر من الرابط + fallback لو فشل -->
     <img
       id="headerPic"
       src="https://www.raed.net/img?id=1516341"
@@ -292,26 +236,20 @@ html,body{
       referrerpolicy="no-referrer"
     >
 
+    <!-- نص الهيدر وسط فوق بعض (قابل للتعديل) -->
     <div class="header-center">
       <div contenteditable="true">الإدارة العامة للتعليم بـمحافظة جدة</div>
       <div contenteditable="true">قطاع التعليم بـالجنوب</div>
       <div contenteditable="true"> مدرسة عماد الدين زنكي المتوسطة</div>
     </div>
 
-    <!-- ✅ زر PDF + طباعة مباشرة -->
+    <!-- زر PDF داخل الهيدر (لا يُطبع) -->
     <div class="header-action" data-nopdf="true">
       <button id="btnPdf" class="pdf-chip" type="button" title="Save as PDF">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2.5L19.5 10H14V4.5ZM8.5 14H10a2 2 0 1 0 0-4H8v6h.5v-2Zm1-3.5H10a1 1 0 1 1 0 2H9.5v-2ZM12 16h1.5c1.38 0 2.5-1.12 2.5-2.5S14.88 11 13.5 11H12v5Zm1-4h.5a1.5 1.5 0 0 1 0 3H13v-3Zm-4.5 6H16v1H8.5v-1Z"/>
         </svg>
-        الحفظ كـ PDF
-      </button>
-
-      <button id="btnPrint" class="print-chip" type="button" title="Print">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path fill="currentColor" d="M6 9V3h12v6h-2V5H8v4H6zm12 2h1a2 2 0 0 1 2 2v5h-3v3H6v-3H3v-5a2 2 0 0 1 2-2h1v2H5v3h14v-3h-1v-2zM8 19h8v-4H8v4z"/>
-        </svg>
-        طباعة مباشرة
+        الحفظ والطباعة
       </button>
     </div>
 
@@ -319,6 +257,7 @@ html,body{
   </div>
 
   <div class="main">
+    <!-- الجدول -->
     <table class="table" id="infoTable" role="table" aria-label="بيانات البرنامج">
       <tr class="title-row">
         <th colspan="4">
@@ -345,6 +284,7 @@ html,body{
       </tr>
     </table>
 
+    <!-- الأهداف + النبذة -->
     <div class="split">
       <div class="card">
         <div class="head">الأهداف</div>
@@ -370,6 +310,7 @@ html,body{
       </div>
     </div>
 
+    <!-- الشواهد -->
     <div class="gallery" id="gallery">
       <div class="photo">
         <input type="file" accept="image/*,.heic,.heif">
@@ -408,6 +349,7 @@ html,body{
       </div>
     </div>
 
+    <!-- التواقيع -->
     <div class="signatures">
       <div class="sig">
         <h4 contenteditable="true">المعلم</h4>
@@ -448,6 +390,7 @@ function toggleBold(id){
   fitBox(id);
 }
 
+/* ========= تحويل صورة (قد يفشل مع CORS) ========= */
 async function toDataURL(img,{maxSide=2400,q=0.95}={}){
   await (img.decode?.().catch(()=>{}) || new Promise(r=>{
     if(img.complete&&img.naturalWidth) r();
@@ -461,6 +404,7 @@ async function toDataURL(img,{maxSide=2400,q=0.95}={}){
   return c.toDataURL('image/jpeg',q);
 }
 
+/* ========= Fallback للهيدر (مناسب لGitHub Pages) ========= */
 function bindHeaderFallback(){
   const img = document.getElementById('headerPic');
   const fb  = document.getElementById('headerFallback');
@@ -470,6 +414,7 @@ function bindHeaderFallback(){
 
   const showFallback = ()=>{
     if(fb) fb.style.display='block';
+    // جرّب المحلي لو موجود
     if(local && img.src !== local){
       img.src = local;
     }
@@ -478,6 +423,7 @@ function bindHeaderFallback(){
   img.addEventListener('error', showFallback);
   img.addEventListener('load', ()=>{ if(fb) fb.style.display='none'; });
 
+  // حماية إضافية: لو ما اكتمل تحميله خلال 4 ثواني جرّب المحلي
   setTimeout(()=>{
     if(!img.complete || !img.naturalWidth){
       showFallback();
@@ -485,6 +431,7 @@ function bindHeaderFallback(){
   }, 4000);
 }
 
+/* ========= صور المعرض بدون تشوّه + خلفية من الصورة ========= */
 async function renderFillNoDistortion(file, box){
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -559,6 +506,7 @@ async function renderFillNoDistortion(file, box){
   });
 }
 
+/* ========= دعم HEIC/HEIF ========= */
 function getExt(name=""){ const i = name.lastIndexOf('.'); return i >= 0 ? name.slice(i+1).toLowerCase() : ""; }
 function isLikelyImage(file){
   const t = (file?.type || "").toLowerCase();
@@ -614,6 +562,7 @@ async function normalizeImageFile(file){
   return file;
 }
 
+/* ========= ربط مربعات الصور ========= */
 function bindPhotoBox(box){
   const input = box.querySelector('input[type=file]');
   const hint  = box.querySelector('.hint');
@@ -670,6 +619,7 @@ function bindPhotoBox(box){
   });
 }
 
+/* التاريخ الهجري الافتراضي */
 (function(){
   try{
     const h=document.getElementById('hijriDate');
@@ -679,6 +629,7 @@ function bindPhotoBox(box){
   }catch{}
 })();
 
+/* حفظ/استرجاع */
 function snap(){
   const cells=[...document.querySelectorAll('#infoTable th,#infoTable td')].map(c=>c.innerHTML);
   const photos=[...document.querySelectorAll('.gallery .photo img')].map(i=>i?.src||'');
@@ -712,10 +663,13 @@ function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(snap()));}
   }catch{}
 })();
 
+/* ========= PDF ========= */
 async function makePdf(){
+  // 1) محاولة تثبيت الهيدر: لو كان remote وفشل CORS، الفallback المحلي سينقذك (إن وجد)
   const header = document.getElementById('headerPic');
   if(header){
     try{
+      // لو كان من رابط خارجي، نحاول تحويله إلى dataURL (قد ينجح/قد يفشل)
       if(header.src && /^https?:\/\//i.test(header.src)){
         header.crossOrigin = 'anonymous';
         const data = await toDataURL(header).catch(()=>null);
@@ -724,6 +678,7 @@ async function makePdf(){
     }catch{}
   }
 
+  // 2) حوّل بقية الصور غير data إلى data (لو أمكن)
   const imgs=[...document.querySelectorAll('#sheet img')];
   for(const im of imgs){
     if(!im.src.startsWith('data:image')){
@@ -747,19 +702,14 @@ async function makePdf(){
   const W=pdf.internal.pageSize.getWidth(),H=pdf.internal.pageSize.getHeight();
   const w=W,h=(canvas.height*W)/canvas.width,fit=h<=H;
   const drawW=fit?w:(canvas.width*H)/canvas.height,drawH=fit?h:H;
-  pdf.addImage(img,'JPEG',(W-drawW)/2,(H-drawW)/2,drawW,drawH,'','FAST');
+  pdf.addImage(img,'JPEG',(W-drawW)/2,(H-drawH)/2,drawW,drawH,'','FAST');
 
   const title=(document.getElementById('reportTitle').innerText||'Report').replace(/[\\\/:*?"<>|]+/g,' ').trim();
   const hijri=(document.getElementById('hijriDate').innerText||'').replace(/\s+/g,' ').trim();
   pdf.save(`${title} - ${hijri}.pdf`);
 }
 
-/* ✅ طباعة مباشرة */
-function printNow(){
-  try{ save(); }catch{}
-  window.print();
-}
-
+/* تشغيل */
 document.addEventListener('DOMContentLoaded', ()=>{
   bindHeaderFallback();
 
@@ -775,10 +725,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     try{ setBusy(true); save(); await makePdf(); }
     catch(e){ console.error(e); alert('تعذّر إنشاء PDF.'); }
     finally{ setBusy(false); }
-  });
-
-  document.getElementById('btnPrint')?.addEventListener('click', ()=>{
-    printNow();
   });
 });
 </script>
