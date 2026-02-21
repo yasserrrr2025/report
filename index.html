@@ -55,7 +55,6 @@ html,body{
 /* زر PDF داخل الهيدر (لا يُطبع) */
 .header-action{
   position:absolute; top:10px; left:12px; z-index:20;
-  display:flex; gap:8px; align-items:center;
 }
 .pdf-chip{
   display:inline-flex; align-items:center; gap:8px;
@@ -75,23 +74,6 @@ html,body{
   content:""; position:absolute; inset:-2px; border-radius:16px; pointer-events:none;
   background:radial-gradient(24px 24px at 85% 30%, rgba(255,255,255,.35), transparent 60%);
 }
-
-/* زر الطباعة المباشرة */
-.print-chip{
-  display:inline-flex; align-items:center; gap:8px;
-  padding:10px 14px; border-radius:14px;
-  background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
-  color:#fff; font-weight:900; letter-spacing:.4px;
-  border:1px solid rgba(255,255,255,.28);
-  box-shadow:0 10px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
-  cursor:pointer; user-select:none;
-  transition:transform .08s ease, filter .2s ease, box-shadow .2s ease;
-  position:relative;
-  backdrop-filter: blur(6px) saturate(140%);
-}
-.print-chip svg{width:18px; height:18px; flex:0 0 18px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
-.print-chip:hover{filter:brightness(1.06); box-shadow:0 12px 26px rgba(0,0,0,.22);}
-.print-chip:active{transform:translateY(1px)}
 
 /* المحتوى */
 .main{padding:0 10mm; display:flex; flex-direction:column; min-height:0}
@@ -233,7 +215,7 @@ html,body{
     box-shadow:none;
     border:none;
   }
-  .header-action{display:none !important;} /* ✅ إخفاء الأزرار */
+  .header-action{display:none !important;}
 }
 </style>
 </head>
@@ -243,6 +225,7 @@ html,body{
 <div class="sheet" id="sheet">
   <!-- الهيدر -->
   <div class="header-img">
+    <!-- ✅ الهيدر من الرابط + fallback لو فشل -->
     <img
       id="headerPic"
       src="https://www.raed.net/img?id=1516341"
@@ -253,26 +236,20 @@ html,body{
       referrerpolicy="no-referrer"
     >
 
+    <!-- نص الهيدر وسط فوق بعض (قابل للتعديل) -->
     <div class="header-center">
       <div contenteditable="true">الإدارة العامة للتعليم بـمحافظة جدة</div>
       <div contenteditable="true">قطاع التعليم بـالجنوب</div>
       <div contenteditable="true"> مدرسة عماد الدين زنكي المتوسطة</div>
     </div>
 
-    <!-- ✅ زر PDF + زر طباعة مباشرة (لا يُطبع) -->
+    <!-- زر PDF داخل الهيدر (لا يُطبع) -->
     <div class="header-action" data-nopdf="true">
       <button id="btnPdf" class="pdf-chip" type="button" title="Save as PDF">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
           <path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2.5L19.5 10H14V4.5ZM8.5 14H10a2 2 0 1 0 0-4H8v6h.5v-2Zm1-3.5H10a1 1 0 1 1 0 2H9.5v-2ZM12 16h1.5c1.38 0 2.5-1.12 2.5-2.5S14.88 11 13.5 11H12v5Zm1-4h.5a1.5 1.5 0 0 1 0 3H13v-3Zm-4.5 6H16v1H8.5v-1Z"/>
         </svg>
-        الحفظ كـ PDF
-      </button>
-
-      <button id="btnPrint" class="print-chip" type="button" title="Print">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path fill="currentColor" d="M6 9V3h12v6h-2V5H8v4H6zm12 2h1a2 2 0 0 1 2 2v5h-3v3H6v-3H3v-5a2 2 0 0 1 2-2h1v2H5v3h14v-3h-1v-2zM8 19h8v-4H8v4z"/>
-        </svg>
-        طباعة مباشرة
+        الحفظ والطباعة
       </button>
     </div>
 
@@ -280,6 +257,7 @@ html,body{
   </div>
 
   <div class="main">
+    <!-- الجدول -->
     <table class="table" id="infoTable" role="table" aria-label="بيانات البرنامج">
       <tr class="title-row">
         <th colspan="4">
@@ -306,6 +284,7 @@ html,body{
       </tr>
     </table>
 
+    <!-- الأهداف + النبذة -->
     <div class="split">
       <div class="card">
         <div class="head">الأهداف</div>
@@ -331,6 +310,7 @@ html,body{
       </div>
     </div>
 
+    <!-- الشواهد -->
     <div class="gallery" id="gallery">
       <div class="photo">
         <input type="file" accept="image/*,.heic,.heif">
@@ -369,6 +349,7 @@ html,body{
       </div>
     </div>
 
+    <!-- التواقيع -->
     <div class="signatures">
       <div class="sig">
         <h4 contenteditable="true">المعلم</h4>
@@ -409,7 +390,7 @@ function toggleBold(id){
   fitBox(id);
 }
 
-/* تحويل صورة (قد يفشل مع CORS) */
+/* ========= تحويل صورة (قد يفشل مع CORS) ========= */
 async function toDataURL(img,{maxSide=2400,q=0.95}={}){
   await (img.decode?.().catch(()=>{}) || new Promise(r=>{
     if(img.complete&&img.naturalWidth) r();
@@ -423,7 +404,7 @@ async function toDataURL(img,{maxSide=2400,q=0.95}={}){
   return c.toDataURL('image/jpeg',q);
 }
 
-/* Fallback للهيدر */
+/* ========= Fallback للهيدر (مناسب لGitHub Pages) ========= */
 function bindHeaderFallback(){
   const img = document.getElementById('headerPic');
   const fb  = document.getElementById('headerFallback');
@@ -433,6 +414,7 @@ function bindHeaderFallback(){
 
   const showFallback = ()=>{
     if(fb) fb.style.display='block';
+    // جرّب المحلي لو موجود
     if(local && img.src !== local){
       img.src = local;
     }
@@ -441,6 +423,7 @@ function bindHeaderFallback(){
   img.addEventListener('error', showFallback);
   img.addEventListener('load', ()=>{ if(fb) fb.style.display='none'; });
 
+  // حماية إضافية: لو ما اكتمل تحميله خلال 4 ثواني جرّب المحلي
   setTimeout(()=>{
     if(!img.complete || !img.naturalWidth){
       showFallback();
@@ -448,7 +431,7 @@ function bindHeaderFallback(){
   }, 4000);
 }
 
-/* صور المعرض بدون تشوّه + خلفية من الصورة */
+/* ========= صور المعرض بدون تشوّه + خلفية من الصورة ========= */
 async function renderFillNoDistortion(file, box){
   return new Promise((resolve, reject) => {
     const url = URL.createObjectURL(file);
@@ -523,7 +506,7 @@ async function renderFillNoDistortion(file, box){
   });
 }
 
-/* دعم HEIC/HEIF */
+/* ========= دعم HEIC/HEIF ========= */
 function getExt(name=""){ const i = name.lastIndexOf('.'); return i >= 0 ? name.slice(i+1).toLowerCase() : ""; }
 function isLikelyImage(file){
   const t = (file?.type || "").toLowerCase();
@@ -579,7 +562,7 @@ async function normalizeImageFile(file){
   return file;
 }
 
-/* ربط مربعات الصور */
+/* ========= ربط مربعات الصور ========= */
 function bindPhotoBox(box){
   const input = box.querySelector('input[type=file]');
   const hint  = box.querySelector('.hint');
@@ -680,11 +663,13 @@ function save(){localStorage.setItem(STORAGE_KEY,JSON.stringify(snap()));}
   }catch{}
 })();
 
-/* PDF */
+/* ========= PDF ========= */
 async function makePdf(){
+  // 1) محاولة تثبيت الهيدر: لو كان remote وفشل CORS، الفallback المحلي سينقذك (إن وجد)
   const header = document.getElementById('headerPic');
   if(header){
     try{
+      // لو كان من رابط خارجي، نحاول تحويله إلى dataURL (قد ينجح/قد يفشل)
       if(header.src && /^https?:\/\//i.test(header.src)){
         header.crossOrigin = 'anonymous';
         const data = await toDataURL(header).catch(()=>null);
@@ -693,6 +678,7 @@ async function makePdf(){
     }catch{}
   }
 
+  // 2) حوّل بقية الصور غير data إلى data (لو أمكن)
   const imgs=[...document.querySelectorAll('#sheet img')];
   for(const im of imgs){
     if(!im.src.startsWith('data:image')){
@@ -723,12 +709,6 @@ async function makePdf(){
   pdf.save(`${title} - ${hijri}.pdf`);
 }
 
-/* ✅ طباعة مباشرة */
-function printNow(){
-  try{ save(); }catch{}
-  window.print();
-}
-
 /* تشغيل */
 document.addEventListener('DOMContentLoaded', ()=>{
   bindHeaderFallback();
@@ -745,10 +725,6 @@ document.addEventListener('DOMContentLoaded', ()=>{
     try{ setBusy(true); save(); await makePdf(); }
     catch(e){ console.error(e); alert('تعذّر إنشاء PDF.'); }
     finally{ setBusy(false); }
-  });
-
-  document.getElementById('btnPrint')?.addEventListener('click', ()=>{
-    printNow();
   });
 });
 </script>
