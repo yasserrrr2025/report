@@ -13,14 +13,12 @@
 :root{
   --ink:#0f172a; --muted:#64748b; --line:#e6eef2;
   --paper:#ffffff; --bg:#f6f8fb;
+  --accent:#2f7f79; --accentDeep:#0e3b46; --footer:#0e3b46;
 
-  --accent:#2f7f79; --accentDeep:#0e3b46;
   --green:#6aa84f; --greenDeep:#3d7a2a;
 
-  --base:14px;
-  --gap:4mm;
-
-  --footer:#0e3b46;
+  --base:14px; --title:19px; --name:17px;
+  --gap-top:4mm; --gap-mid:4mm; --gap-section:4mm;
 }
 
 *{box-sizing:border-box}
@@ -43,12 +41,12 @@ html,body{
   background:radial-gradient(1200px 400px at 50% -10%, rgba(47,127,121,.10), transparent 60%);
 }
 
-/* ===== الهيدر ===== */
+/* ===== الهيدر (مثل تقرير البرنامج) ===== */
 .header-img{position:relative; height:30mm; overflow:hidden; background:var(--accentDeep)}
 .header-img img{width:100%; height:100%; object-fit:cover; display:block}
 .header-fallback{position:absolute; inset:0; background:linear-gradient(90deg,#0b7e88,#15a3ad); display:none}
 
-/* نص الهيدر (قابل للتعديل) */
+/* نص الهيدر وسط */
 .header-center{
   position:absolute; inset:0;
   display:flex; flex-direction:column;
@@ -60,44 +58,40 @@ html,body{
 }
 .header-center > div:focus{outline:2px dashed rgba(255,255,255,.85); outline-offset:4px}
 
-/* ===== أزرار الهيدر (يمين أعلى) ===== */
+/* زر واحد داخل الهيدر (مثل تقرير البرنامج) */
 .header-action{
-  position:absolute; top:10px; right:12px; left:auto;
-  z-index:20; display:flex; gap:8px; align-items:center;
-  padding:6px; border-radius:16px;
-  background:rgba(0,0,0,.15);
-  backdrop-filter: blur(6px) saturate(140%);
-  border:1px solid rgba(255,255,255,.18);
+  position:absolute; top:10px; left:12px; z-index:20;
 }
-.chip{
+.pdf-chip{
   display:inline-flex; align-items:center; gap:8px;
-  padding:8px 12px; border-radius:12px;
-  color:#fff; font-weight:900; letter-spacing:.2px;
+  padding:10px 14px; border-radius:14px;
+  background:linear-gradient(180deg, var(--accent), var(--accentDeep));
+  color:#fff; font-weight:900; letter-spacing:.4px;
   border:1px solid rgba(255,255,255,.25);
+  box-shadow:0 10px 22px rgba(14,59,70,.25), inset 0 1px 0 rgba(255,255,255,.18);
   cursor:pointer; user-select:none;
   transition:transform .08s ease, filter .2s ease, box-shadow .2s ease;
   position:relative;
 }
-.chip svg{width:18px; height:18px; flex:0 0 18px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
-.chip:active{transform:translateY(1px)}
-#btnPdf{background:linear-gradient(180deg, var(--accent), var(--accentDeep));
-  box-shadow:0 10px 22px rgba(14,59,70,.25), inset 0 1px 0 rgba(255,255,255,.18);}
-#btnPrint{background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
-  box-shadow:0 10px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
-  backdrop-filter: blur(6px) saturate(140%);}
-.chip:hover{filter:brightness(1.06); box-shadow:0 12px 26px rgba(0,0,0,.22);}
+.pdf-chip svg{width:18px; height:18px; flex:0 0 18px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
+.pdf-chip:hover{filter:brightness(1.05); box-shadow:0 12px 26px rgba(14,59,70,.35);}
+.pdf-chip:active{transform:translateY(1px)}
+.pdf-chip::after{
+  content:""; position:absolute; inset:-2px; border-radius:16px; pointer-events:none;
+  background:radial-gradient(24px 24px at 85% 30%, rgba(255,255,255,.35), transparent 60%);
+}
 
 /* ===== المحتوى ===== */
 .main{
   padding:0 10mm;
   display:flex; flex-direction:column;
-  gap:var(--gap);
+  gap:var(--gap-section);
   min-height:0;
 }
 
 /* ===== عنوان النموذج ===== */
 .top-title{
-  margin-top:var(--gap);
+  margin-top:var(--gap-top);
   border:1px solid var(--line);
   border-radius:14px;
   overflow:hidden;
@@ -129,12 +123,10 @@ html,body{
   border-bottom:2px dotted #94a3b8;
   height:22px;
 }
-.edit{
-  padding:2px 6px; border-radius:8px;
-}
+.edit{padding:2px 6px; border-radius:8px}
 .edit:focus{outline:2px dashed rgba(47,127,121,.55); outline-offset:2px}
 
-/* ===== جداول الأقسام (مثل نموذج الوزارة) ===== */
+/* ===== أقسام الجداول (حل التداخل) ===== */
 .section{
   border:1px solid var(--line);
   border-radius:14px;
@@ -150,6 +142,8 @@ html,body{
   display:flex; align-items:center; justify-content:space-between; gap:10px;
 }
 .section .head .hint{font-weight:700; opacity:.95; font-size:13px}
+
+/* مهم جداً: يمنع تداخل/كسر الجدول */
 .section table{
   width:100%;
   border-collapse:separate;
@@ -163,6 +157,9 @@ html,body{
   vertical-align:top;
   font-size:13.5px;
   line-height:1.6;
+
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 .section tr > *:last-child{border-left:none}
 .section th{
@@ -174,47 +171,44 @@ html,body{
 .section td[contenteditable="true"]{background:#fff}
 .section td[contenteditable="true"]:focus{outline:2px dashed rgba(47,127,121,.45); outline-offset:2px}
 
-/* ===== مربع النص الطويل ===== */
-.textbox{
-  min-height:64px;
-  white-space:pre-wrap;
-  word-break:break-word;
-}
+/* مربع النص الطويل */
+.textbox{min-height:64px; white-space:pre-wrap; word-break:break-word}
 
-/* ===== أعضاء الفريق (ديناميكي + عمودين عند زيادة الصفوف) ===== */
-.team-wrap{
-  display:grid;
-  grid-template-rows:auto 1fr;
-}
-.team-tools{
-  display:flex; align-items:center; justify-content:flex-end; gap:8px;
-}
+/* ===== أعضاء الفريق ===== */
+.team-area{height:62mm; display:flex; flex-direction:column; min-height:0}
+.team-tools{display:flex; align-items:center; gap:8px}
 .team-tools button{
-  border:1px solid var(--line);
-  background:#fff;
+  border:1px solid rgba(255,255,255,.22);
+  background:rgba(255,255,255,.14);
+  color:#fff;
   border-radius:10px;
-  padding:8px 10px;
+  padding:7px 10px;
   font-weight:900;
   cursor:pointer;
 }
+.team-tools button:hover{filter:brightness(1.05)}
 .team-tools button:active{transform:scale(.99)}
 
+.team-wrap{display:grid; grid-template-rows:auto 1fr; min-height:0}
 .team-grid{
   margin-top:10px;
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
   min-height:0;
+  flex:1;
 }
+.team-grid.onecol{grid-template-columns:1fr}
 
-/* ارتفاع ثابت حتى لا يمتد لصفحة ثانية */
 .team-box{
   border:1px solid var(--line);
   border-radius:12px;
   overflow:hidden;
   background:#fff;
   min-height:0;
+  height:100%;
 }
+.team-box .inner{height:100%; overflow:hidden}
 .team-box table{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed}
 .team-box th, .team-box td{
   border-top:1px solid var(--line);
@@ -225,6 +219,7 @@ html,body{
   text-align:center;
   vertical-align:middle;
   word-break:break-word;
+  overflow-wrap:anywhere;
 }
 .team-box tr > *:last-child{border-left:none}
 .team-box thead th{
@@ -234,34 +229,8 @@ html,body{
 }
 .team-box td[contenteditable="true"]:focus{outline:2px dashed rgba(47,127,121,.45); outline-offset:2px}
 
-.team-area{
-  /* مساحة محسوبة داخل الصفحة */
-  height:62mm;           /* ✅ لا تخرج من الصفحة */
-  display:flex;
-  flex-direction:column;
-  min-height:0;
-}
-.team-grid{
-  flex:1;
-  min-height:0;
-}
-.team-box{
-  height:100%;
-}
-.team-box .inner{
-  height:100%;
-  overflow:hidden;        /* ممنوع يطلع برا */
-}
-
-/* في حال عمود واحد */
-.team-grid.onecol{grid-template-columns:1fr}
-
 /* ===== التوقيع ===== */
-.sign-row{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:10px;
-}
+.sign-row{display:grid; grid-template-columns:1fr 1fr; gap:10px}
 .sig{
   border:1px solid var(--line);
   border-radius:14px;
@@ -277,11 +246,7 @@ html,body{
   border-bottom:1px solid var(--line);
   text-align:center;
 }
-.sig .b{
-  padding:12px 10px;
-  text-align:center;
-  font-weight:900;
-}
+.sig .b{padding:12px 10px; text-align:center; font-weight:900}
 .sig .b[contenteditable="true"]:focus{outline:2px dashed rgba(47,127,121,.45); outline-offset:2px}
 
 /* ===== الفوتر ===== */
@@ -299,7 +264,6 @@ html,body{
 /* ===== الطباعة ===== */
 @media print{
   html, body{background:#fff !important; margin:0 !important; padding:0 !important;}
-
   .sheet{
     transform:none !important;
     width:210mm !important;
@@ -307,11 +271,9 @@ html,body{
     margin:0 !important;
     border:none !important;
     box-shadow:none !important;
-    overflow:visible !important; /* مهم */
+    overflow:visible !important;
     position:relative !important;
   }
-
-  /* تثبيت التذييل في أسفل الصفحة */
   .footer-bar{
     position:fixed !important;
     left:0 !important; right:0 !important; bottom:0 !important;
@@ -320,11 +282,7 @@ html,body{
     print-color-adjust: exact !important;
     -webkit-print-color-adjust: exact !important;
   }
-
-  /* مساحة آمنة */
   .main{padding-bottom:10mm !important;}
-
-  /* إخفاء أزرار وأدوات */
   .header-action, .noprint{display:none !important;}
 }
 </style>
@@ -350,14 +308,13 @@ html,body{
       <div id="hdr3" class="edit" data-save="1" contenteditable="true">مدرسة عماد الدين زنكي المتوسطة</div>
     </div>
 
+    <!-- ✅ نفس زر تقرير البرنامج: زر واحد -->
     <div class="header-action noprint" data-nopdf="true">
-      <button id="btnPdf" class="chip" type="button" title="Save as PDF">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2.5L19.5 10H14V4.5Z"/></svg>
-        حفظ PDF
-      </button>
-      <button id="btnPrint" class="chip" type="button" title="Print">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 9V3h12v6h-2V5H8v4H6zm12 2h1a2 2 0 0 1 2 2v5h-3v3H6v-3H3v-5a2 2 0 0 1 2-2h1v2H5v3h14v-3h-1v-2zM8 19h8v-4H8v4z"/></svg>
-        طباعة
+      <button id="btnOne" class="pdf-chip" type="button" title="Save as PDF and Print">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2.5L19.5 10H14V4.5ZM8.5 14H10a2 2 0 1 0 0-4H8v6h.5v-2Zm1-3.5H10a1 1 0 1 1 0 2H9.5v-2ZM12 16h1.5c1.38 0 2.5-1.12 2.5-2.5S14.88 11 13.5 11H12v5Zm1-4h.5a1.5 1.5 0 0 1 0 3H13v-3Zm-4.5 6H16v1H8.5v-1Z"/>
+        </svg>
+        الحفظ والطباعة
       </button>
     </div>
 
@@ -478,14 +435,12 @@ html,body{
     <div class="section team-area">
       <div class="head">
         <span>• أعضاء فريق مجتمع التعلم</span>
-
         <div class="team-tools noprint">
           <button type="button" id="btnAddRow">+ إضافة صف</button>
           <button type="button" id="btnRemoveRow">حذف آخر صف</button>
           <button type="button" id="btnClearTeam">تفريغ</button>
         </div>
       </div>
-
       <div class="team-wrap">
         <div class="team-grid" id="teamGrid"></div>
       </div>
@@ -512,7 +467,7 @@ html,body{
 /* =========================
    إعدادات + حفظ
 ========================= */
-const STORAGE_KEY = "plc_report_v1";
+const STORAGE_KEY = "plc_report_v2_one_button";
 
 /* التاريخ الهجري الافتراضي */
 (function(){
@@ -542,14 +497,12 @@ function bindHeaderFallback(){
   img.addEventListener('error', showFallback);
   img.addEventListener('load', ()=>{ if(fb) fb.style.display='none'; });
 
-  setTimeout(()=>{
-    if(!img.complete || !img.naturalWidth) showFallback();
-  }, 4000);
+  setTimeout(()=>{ if(!img.complete || !img.naturalWidth) showFallback(); }, 4000);
 }
 
 /* =========================
    جدول الفريق (ديناميكي)
-   - إذا زادت الصفوف: يقسم إلى عمودين داخل نفس الصفحة
+   - عمودين داخل نفس الصفحة
 ========================= */
 let teamData = [
   {name:"", role:"", sign:""},
@@ -560,14 +513,13 @@ let teamData = [
   {name:"", role:"", sign:""},
 ];
 
-const PER_COL = 6;     // ✅ بعد 6 صفوف يبدأ العمود الثاني (داخل نفس الصفحة)
-const MAX_ROWS = 12;   // ✅ سقف عملي داخل صفحة واحدة (عمودين × 6)
+const PER_COL = 6;   // بعد 6 صفوف يبدأ العمود الثاني
+const MAX_ROWS = 12; // سقف صفحة واحدة
 
 function renderTeam(){
   const grid = document.getElementById("teamGrid");
   if(!grid) return;
 
-  // ضبط عدد الأعمدة
   const cols = (teamData.length > PER_COL) ? 2 : 1;
   grid.classList.toggle("onecol", cols === 1);
 
@@ -599,7 +551,6 @@ function buildTeamTable(rows, offset){
     </thead>
     <tbody></tbody>
   `;
-
   const tbody = table.querySelector("tbody");
 
   rows.forEach((r, i) => {
@@ -613,7 +564,6 @@ function buildTeamTable(rows, offset){
     tbody.appendChild(tr);
   });
 
-  // لو الصفوف أقل من PER_COL (لتوازن الشكل)
   for(let k = rows.length; k < PER_COL; k++){
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -622,11 +572,9 @@ function buildTeamTable(rows, offset){
       <td contenteditable="true" data-col="sign" data-idx="${offset+k}"></td>
     `;
     tbody.appendChild(tr);
-    // ضمان وجود عنصر في teamData لو المستخدم كتب
     if(teamData[offset+k] == null) teamData[offset+k] = {name:"", role:"", sign:""};
   }
 
-  // ربط إدخال التعديل
   table.addEventListener("input", (e)=>{
     const cell = e.target;
     if(!cell || !cell.dataset) return;
@@ -634,7 +582,6 @@ function buildTeamTable(rows, offset){
     const col = cell.dataset.col;
     if(!Number.isFinite(idx) || !col) return;
 
-    // إذا المستخدم كتب في خلايا تمت إضافتها تلقائياً
     if(!teamData[idx]) teamData[idx] = {name:"", role:"", sign:""};
     teamData[idx][col] = cell.innerText.trim();
     save();
@@ -646,35 +593,30 @@ function buildTeamTable(rows, offset){
 }
 
 function escapeHtml(str=""){
-  return String(str)
-    .replaceAll("&","&amp;")
-    .replaceAll("<","&lt;")
-    .replaceAll(">","&gt;");
+  return String(str).replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;");
 }
 
 /* أدوات التحكم */
 document.getElementById("btnAddRow")?.addEventListener("click", ()=>{
   if(teamData.length >= MAX_ROWS){
-    alert("وصلت للحد الأقصى داخل صفحة واحدة (12 صف). إذا تبغى أكثر نعمل صفحة ثانية تلقائياً بنسخة لاحقة.");
+    alert("وصلت للحد الأقصى داخل صفحة واحدة (12 صف).");
     return;
   }
   teamData.push({name:"", role:"", sign:""});
   renderTeam();
 });
-
 document.getElementById("btnRemoveRow")?.addEventListener("click", ()=>{
   if(teamData.length <= 1) return;
   teamData.pop();
   renderTeam();
 });
-
 document.getElementById("btnClearTeam")?.addEventListener("click", ()=>{
   teamData = [{name:"", role:"", sign:""}];
   renderTeam();
 });
 
 /* =========================
-   حفظ/استرجاع كل المحتوى
+   حفظ/استرجاع
 ========================= */
 function snap(){
   const fields = [...document.querySelectorAll('[data-save="1"]')].map(el=>({
@@ -692,28 +634,25 @@ function restore(){
     if(!raw) return;
     const s = JSON.parse(raw);
 
-    // الحقول
     (s.fields || []).forEach(f=>{
       const el = document.getElementById(f.id);
       if(el) el.innerHTML = f.html;
     });
 
-    // الفريق
     if(Array.isArray(s.team) && s.team.length){
-      teamData = s.team.map(x=>({
-        name: x?.name || "",
-        role: x?.role || "",
-        sign: x?.sign || ""
-      }));
-      // تنظيف أي فراغات زائدة
-      teamData = teamData.slice(0, MAX_ROWS);
+      teamData = s.team.map(x=>({name:x?.name||"", role:x?.role||"", sign:x?.sign||""})).slice(0, MAX_ROWS);
     }
   }catch{}
 }
 
 /* =========================
-   PDF + طباعة
+   PDF + طباعة (زر واحد)
 ========================= */
+function setBusy(b){
+  const btn = document.getElementById("btnOne");
+  if(btn) btn.disabled = !!b;
+}
+
 async function toDataURL(img,{maxSide=2400,q=0.95}={}){
   await (img.decode?.().catch(()=>{}) || new Promise(r=>{
     if(img.complete && img.naturalWidth) r();
@@ -728,7 +667,6 @@ async function toDataURL(img,{maxSide=2400,q=0.95}={}){
 }
 
 async function makePdf(){
-  // محاولة تثبيت الهيدر (قد يفشل بسبب CORS)
   const header = document.getElementById('headerPic');
   if(header){
     try{
@@ -740,7 +678,6 @@ async function makePdf(){
     }catch{}
   }
 
-  // تجاهل أزرار/أدوات
   const canvas = await html2canvas(document.getElementById('sheet'),{
     scale: Math.min(window.devicePixelRatio||2, 2.4),
     backgroundColor:'#ffffff',
@@ -769,9 +706,12 @@ async function makePdf(){
   pdf.save(`${title}${hijri ? " - " + hijri : ""}.pdf`);
 }
 
-function printNow(){
-  try{ save(); }catch{}
-  window.print();
+async function saveAndPrint(){
+  save();
+  // PDF ثم طباعة مباشرة
+  await makePdf();
+  // بعد تنزيل PDF افتح الطباعة
+  setTimeout(()=> window.print(), 300);
 }
 
 /* =========================
@@ -782,19 +722,15 @@ document.addEventListener("DOMContentLoaded", ()=>{
   restore();
   renderTeam();
 
-  // حفظ عند أي تعديل في الحقول
   document.querySelectorAll('[data-save="1"]').forEach(el=>{
-    ['input','keyup','blur'].forEach(evt=>{
-      el.addEventListener(evt, ()=> save());
-    });
+    ['input','keyup','blur'].forEach(evt=> el.addEventListener(evt, save));
   });
 
-  document.getElementById("btnPdf")?.addEventListener("click", async ()=>{
-    try{ save(); await makePdf(); }
-    catch(e){ console.error(e); alert("تعذّر إنشاء PDF."); }
+  document.getElementById("btnOne")?.addEventListener("click", async ()=>{
+    try{ setBusy(true); await saveAndPrint(); }
+    catch(e){ console.error(e); alert("تعذّر تنفيذ الحفظ/الطباعة."); }
+    finally{ setBusy(false); }
   });
-
-  document.getElementById("btnPrint")?.addEventListener("click", ()=> printNow());
 });
 </script>
 </body>
