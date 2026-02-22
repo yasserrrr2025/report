@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>استمارة مجتمع تعلم مهني — وزارة التعليم</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;600;700;800&display=swap" rel="stylesheet">
+<script defer src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+
+<style>
+:root{
+  --ink:#0f172a; --muted:#64748b; --line:#e6eef2;
+  --paper:#ffffff; --bg:#f6f8fb;
+
+  --accent:#2f7f79; --accentDeep:#0e3b46;
+  --green:#6aa84f; --greenDeep:#3d7a2a;
+
+  --base:14px;
+  --gap:4mm;
+
+  --footer:#0e3b46;
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%; margin:0; background:var(--bg); color:var(--ink);
+  font-family:"Tajawal",system-ui,sans-serif; font-size:var(--base); line-height:1.6;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+  text-rendering:optimizeLegibility;
+}
+
+/* ===== ورقة A4 ===== */
+.sheet{
+  width:210mm; height:297mm; margin:12px auto; background:var(--paper);
+  border:1px solid #e5e7eb; box-shadow:0 10px 28px rgba(0,0,0,.08);
+  display:grid; grid-template-rows:30mm auto 6mm;
+  overflow:hidden; position:relative;
+}
+.sheet:before{
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(1200px 400px at 50% -10%, rgba(47,127,121,.10), transparent 60%);
+}
+
+/* ===== الهيدر ===== */
+.header-img{position:relative; height:30mm; overflow:hidden; background:var(--accentDeep)}
+.header-img img{width:100%; height:100%; object-fit:cover; display:block}
+.header-fallback{position:absolute; inset:0; background:linear-gradient(90deg,#0b7e88,#15a3ad); display:none}
+
+/* نص الهيدر (قابل للتعديل) */
+.header-center{
+  position:absolute; inset:0;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  text-align:center; color:#fff;
+  font-weight:900; font-size:17px; line-height:1.55;
+  z-index:10;
+  text-shadow:0 2px 10px rgba(0,0,0,.25);
+}
+.header-center > div:focus{outline:2px dashed rgba(255,255,255,.85); outline-offset:4px}
+
+/* ===== أزرار الهيدر (يمين أعلى) ===== */
+.header-action{
+  position:absolute; top:10px; right:12px; left:auto;
+  z-index:20; display:flex; gap:8px; align-items:center;
+  padding:6px; border-radius:16px;
+  background:rgba(0,0,0,.15);
+  backdrop-filter: blur(6px) saturate(140%);
+  border:1px solid rgba(255,255,255,.18);
+}
+.chip{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:8px 12px; border-radius:12px;
+  color:#fff; font-weight:900; letter-spacing:.2px;
+  border:1px solid rgba(255,255,255,.25);
+  cursor:pointer; user-select:none;
+  transition:transform .08s ease, filter .2s ease, box-shadow .2s ease;
+  position:relative;
+}
+.chip svg{width:18px; height:18px; flex:0 0 18px; filter:drop-shadow(0 1px 0 rgba(0,0,0,.2))}
+.chip:active{transform:translateY(1px)}
+#btnPdf{background:linear-gradient(180deg, var(--accent), var(--accentDeep));
+  box-shadow:0 10px 22px rgba(14,59,70,.25), inset 0 1px 0 rgba(255,255,255,.18);}
+#btnPrint{background:linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
+  box-shadow:0 10px 22px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.16);
+  backdrop-filter: blur(6px) saturate(140%);}
+.chip:hover{filter:brightness(1.06); box-shadow:0 12px 26px rgba(0,0,0,.22);}
+
+/* ===== المحتوى ===== */
+.main{
+  padding:0 10mm;
+  display:flex; flex-direction:column;
+  gap:var(--gap);
+  min-height:0;
+}
+
+/* ===== عنوان النموذج ===== */
+.top-title{
+  margin-top:var(--gap);
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.06);
+}
+.top-title .bar{
+  padding:10px 14px;
+  background:linear-gradient(180deg, rgba(106,168,79,.95), rgba(61,122,42,.95));
+  color:#fff; font-weight:900;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.top-title .bar .right{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.badge{
+  display:inline-flex; align-items:center; justify-content:center;
+  padding:4px 10px; border-radius:999px;
+  background:rgba(255,255,255,.16);
+  border:1px solid rgba(255,255,255,.22);
+  font-weight:900;
+}
+.top-title .body{
+  padding:10px 14px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.line-field{display:flex; gap:10px; align-items:center; flex-wrap:wrap}
+.label{font-weight:900; color:#1f3b2a}
+.dots{
+  min-width:260px;
+  border-bottom:2px dotted #94a3b8;
+  height:22px;
+}
+.edit{
+  padding:2px 6px; border-radius:8px;
+}
+.edit:focus{outline:2px dashed rgba(47,127,121,.55); outline-offset:2px}
+
+/* ===== جداول الأقسام (مثل نموذج الوزارة) ===== */
+.section{
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.06);
+}
+.section .head{
+  background:linear-gradient(180deg, rgba(106,168,79,.95), rgba(61,122,42,.95));
+  color:#fff;
+  font-weight:900;
+  padding:8px 12px;
+  display:flex; align-items:center; justify-content:space-between; gap:10px;
+}
+.section .head .hint{font-weight:700; opacity:.95; font-size:13px}
+.section table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  table-layout:fixed;
+}
+.section th, .section td{
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+  padding:8px 10px;
+  vertical-align:top;
+  font-size:13.5px;
+  line-height:1.6;
+}
+.section tr > *:last-child{border-left:none}
+.section th{
+  width:22%;
+  background:linear-gradient(180deg,#f1fafb,#ecf7f8);
+  color:#1d6a65;
+  font-weight:900;
+}
+.section td[contenteditable="true"]{background:#fff}
+.section td[contenteditable="true"]:focus{outline:2px dashed rgba(47,127,121,.45); outline-offset:2px}
+
+/* ===== مربع النص الطويل ===== */
+.textbox{
+  min-height:64px;
+  white-space:pre-wrap;
+  word-break:break-word;
+}
+
+/* ===== أعضاء الفريق (ديناميكي + عمودين عند زيادة الصفوف) ===== */
+.team-wrap{
+  display:grid;
+  grid-template-rows:auto 1fr;
+}
+.team-tools{
+  display:flex; align-items:center; justify-content:flex-end; gap:8px;
+}
+.team-tools button{
+  border:1px solid var(--line);
+  background:#fff;
+  border-radius:10px;
+  padding:8px 10px;
+  font-weight:900;
+  cursor:pointer;
+}
+.team-tools button:active{transform:scale(.99)}
+
+.team-grid{
+  margin-top:10px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  min-height:0;
+}
+
+/* ارتفاع ثابت حتى لا يمتد لصفحة ثانية */
+.team-box{
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  background:#fff;
+  min-height:0;
+}
+.team-box table{width:100%; border-collapse:separate; border-spacing:0; table-layout:fixed}
+.team-box th, .team-box td{
+  border-top:1px solid var(--line);
+  border-left:1px solid var(--line);
+  padding:7px 8px;
+  font-size:13px;
+  line-height:1.35;
+  text-align:center;
+  vertical-align:middle;
+  word-break:break-word;
+}
+.team-box tr > *:last-child{border-left:none}
+.team-box thead th{
+  background:linear-gradient(180deg,#f1fafb,#ecf7f8);
+  color:#1d6a65;
+  font-weight:900;
+}
+.team-box td[contenteditable="true"]:focus{outline:2px dashed rgba(47,127,121,.45); outline-offset:2px}
+
+.team-area{
+  /* مساحة محسوبة داخل الصفحة */
+  height:62mm;           /* ✅ لا تخرج من الصفحة */
+  display:flex;
+  flex-direction:column;
+  min-height:0;
+}
+.team-grid{
+  flex:1;
+  min-height:0;
+}
+.team-box{
+  height:100%;
+}
+.team-box .inner{
+  height:100%;
+  overflow:hidden;        /* ممنوع يطلع برا */
+}
+
+/* في حال عمود واحد */
+.team-grid.onecol{grid-template-columns:1fr}
+
+/* ===== التوقيع ===== */
+.sign-row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.sig{
+  border:1px solid var(--line);
+  border-radius:14px;
+  overflow:hidden;
+  background:#fff;
+  box-shadow:0 6px 16px rgba(0,0,0,.06);
+}
+.sig .h{
+  padding:9px 10px;
+  background:linear-gradient(180deg,#f6fbfc,#eef7f8);
+  color:#0b7e88;
+  font-weight:900;
+  border-bottom:1px solid var(--line);
+  text-align:center;
+}
+.sig .b{
+  padding:12px 10px;
+  text-align:center;
+  font-weight:900;
+}
+.sig .b[contenteditable="true"]:focus{outline:2px dashed rgba(47,127,121,.45); outline-offset:2px}
+
+/* ===== الفوتر ===== */
+.footer-bar{height:6mm; background:var(--footer)}
+
+/* ===== الموبايل ===== */
+@media screen and (max-width:900px){
+  body{overflow-x:auto;}
+  .sheet{transform:scale(.85); transform-origin:top center; margin:8px auto 16px;}
+}
+@media screen and (max-width:600px){
+  .sheet{transform:scale(.75); transform-origin:top center;}
+}
+
+/* ===== الطباعة ===== */
+@media print{
+  html, body{background:#fff !important; margin:0 !important; padding:0 !important;}
+
+  .sheet{
+    transform:none !important;
+    width:210mm !important;
+    height:297mm !important;
+    margin:0 !important;
+    border:none !important;
+    box-shadow:none !important;
+    overflow:visible !important; /* مهم */
+    position:relative !important;
+  }
+
+  /* تثبيت التذييل في أسفل الصفحة */
+  .footer-bar{
+    position:fixed !important;
+    left:0 !important; right:0 !important; bottom:0 !important;
+    height:6mm !important;
+    background:var(--footer) !important;
+    print-color-adjust: exact !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  /* مساحة آمنة */
+  .main{padding-bottom:10mm !important;}
+
+  /* إخفاء أزرار وأدوات */
+  .header-action, .noprint{display:none !important;}
+}
+</style>
+</head>
+
+<body>
+<div class="sheet" id="sheet">
+
+  <!-- ===== الهيدر ===== -->
+  <div class="header-img">
+    <img
+      id="headerPic"
+      src="https://www.raed.net/img?id=1516341"
+      data-src-local="header.jpg"
+      alt="هيدر وزارة التعليم"
+      crossOrigin="anonymous"
+      referrerpolicy="no-referrer"
+    >
+
+    <div class="header-center">
+      <div id="hdr1" class="edit" data-save="1" contenteditable="true">الإدارة العامة للتعليم بمحافظة جدة</div>
+      <div id="hdr2" class="edit" data-save="1" contenteditable="true">قطاع التعليم بالجنوب</div>
+      <div id="hdr3" class="edit" data-save="1" contenteditable="true">مدرسة عماد الدين زنكي المتوسطة</div>
+    </div>
+
+    <div class="header-action noprint" data-nopdf="true">
+      <button id="btnPdf" class="chip" type="button" title="Save as PDF">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6Zm0 2.5L19.5 10H14V4.5Z"/></svg>
+        حفظ PDF
+      </button>
+      <button id="btnPrint" class="chip" type="button" title="Print">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M6 9V3h12v6h-2V5H8v4H6zm12 2h1a2 2 0 0 1 2 2v5h-3v3H6v-3H3v-5a2 2 0 0 1 2-2h1v2H5v3h14v-3h-1v-2zM8 19h8v-4H8v4z"/></svg>
+        طباعة
+      </button>
+    </div>
+
+    <div class="header-fallback" id="headerFallback"></div>
+  </div>
+
+  <!-- ===== المحتوى ===== -->
+  <div class="main">
+
+    <!-- عنوان النموذج + اسم المجتمع -->
+    <div class="top-title">
+      <div class="bar">
+        <div class="right">
+          <span>استمارة مجتمع تعلم مهني</span>
+          <span class="badge">تقرير نشاط مجتمع تعلم مهني</span>
+        </div>
+        <span id="docNo" class="badge edit" data-save="1" contenteditable="true">رقم ( ١ )</span>
+      </div>
+
+      <div class="body">
+        <div class="line-field">
+          <span class="label">اسم المجتمع:</span>
+          <span id="communityName" class="dots edit" data-save="1" contenteditable="true">اكتب اسم المجتمع هنا</span>
+        </div>
+
+        <div class="line-field">
+          <span class="label">التاريخ (هجري):</span>
+          <span id="hijriDate" class="dots edit" data-save="1" contenteditable="true"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- بيانات النشاط -->
+    <div class="section">
+      <div class="head">
+        <span>• بيانات النشاط</span>
+        <span class="hint">اكتب البيانات الأساسية</span>
+      </div>
+      <table>
+        <tr>
+          <th>عنوان النشاط</th>
+          <td id="actTitle" data-save="1" contenteditable="true"></td>
+          <th>أسلوب النشاط</th>
+          <td id="actStyle" data-save="1" contenteditable="true">مثال: لقاء / ورشة / زيارة تربوية / حلقة نقاش…</td>
+        </tr>
+        <tr>
+          <th>مكان التنفيذ</th>
+          <td id="actPlace" data-save="1" contenteditable="true"></td>
+          <th>مستفيدون</th>
+          <td id="actAudience" data-save="1" contenteditable="true"></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- تنفيذ النشاط -->
+    <div class="section">
+      <div class="head">
+        <span>• تنفيذ النشاط</span>
+        <span class="hint">تفاصيل التنفيذ</span>
+      </div>
+      <table>
+        <tr>
+          <th>تاريخ التنفيذ</th>
+          <td id="execDate" data-save="1" contenteditable="true"></td>
+          <th>اسم المنفذ</th>
+          <td id="execBy" data-save="1" contenteditable="true">قد يكون عضو/فريق/طرف خارجي</td>
+        </tr>
+        <tr>
+          <th>المستهدف</th>
+          <td id="execTarget" data-save="1" contenteditable="true"></td>
+          <th>عدد الحضور</th>
+          <td id="execCount" data-save="1" contenteditable="true"></td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- وصف النشاط -->
+    <div class="section">
+      <div class="head">
+        <span>• وصف النشاط</span>
+        <span class="hint">سجل هدف واحد + أدوات/روابط إن وجدت</span>
+      </div>
+      <table>
+        <tr>
+          <th>الهدف</th>
+          <td id="descGoal" class="textbox" data-save="1" contenteditable="true">يسجل هنا هدف واحد فقط…</td>
+        </tr>
+        <tr>
+          <th>الأدوات المستخدمة</th>
+          <td id="descTools" class="textbox" data-save="1" contenteditable="true"></td>
+        </tr>
+        <tr>
+          <th>إدراج رابط</th>
+          <td id="descLink" class="textbox" data-save="1" contenteditable="true">ضع رابط المادة الإثرائية (إن وجد)…</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- النتائج والتحقق -->
+    <div class="section">
+      <div class="head">
+        <span>• النتائج والتحقق</span>
+        <span class="hint">تحسينات ومعوقات</span>
+      </div>
+      <table>
+        <tr>
+          <th>عوامل التحسن المتوقعة</th>
+          <td id="resImprove" class="textbox" data-save="1" contenteditable="true"></td>
+        </tr>
+        <tr>
+          <th>أبرز المعوقات</th>
+          <td id="resRisks" class="textbox" data-save="1" contenteditable="true">وقد لا يوجد معوقات…</td>
+        </tr>
+      </table>
+    </div>
+
+    <!-- أعضاء فريق مجتمع التعلم (ديناميكي) -->
+    <div class="section team-area">
+      <div class="head">
+        <span>• أعضاء فريق مجتمع التعلم</span>
+
+        <div class="team-tools noprint">
+          <button type="button" id="btnAddRow">+ إضافة صف</button>
+          <button type="button" id="btnRemoveRow">حذف آخر صف</button>
+          <button type="button" id="btnClearTeam">تفريغ</button>
+        </div>
+      </div>
+
+      <div class="team-wrap">
+        <div class="team-grid" id="teamGrid"></div>
+      </div>
+    </div>
+
+    <!-- التواقيع -->
+    <div class="sign-row">
+      <div class="sig">
+        <div class="h">منسق الفريق</div>
+        <div id="coordinator" class="b" data-save="1" contenteditable="true">اكتب الاسم هنا</div>
+      </div>
+      <div class="sig">
+        <div class="h">مدير المدرسة</div>
+        <div id="principal" class="b" data-save="1" contenteditable="true">عابد عبيد الجدعاني</div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="footer-bar" aria-hidden="true"></div>
+</div>
+
+<script>
+/* =========================
+   إعدادات + حفظ
+========================= */
+const STORAGE_KEY = "plc_report_v1";
+
+/* التاريخ الهجري الافتراضي */
+(function(){
+  try{
+    const h = document.getElementById("hijriDate");
+    if(h && !h.textContent.trim()){
+      h.textContent = new Intl.DateTimeFormat('ar-SA-u-ca-islamic-umalqura',{
+        day:'2-digit', month:'long', year:'numeric'
+      }).format(new Date());
+    }
+  }catch{}
+})();
+
+/* ========= هيدر: fallback محلي للهيدر (GitHub Pages) ========= */
+function bindHeaderFallback(){
+  const img = document.getElementById('headerPic');
+  const fb  = document.getElementById('headerFallback');
+  if(!img) return;
+
+  const local = img.getAttribute('data-src-local') || 'header.jpg';
+
+  const showFallback = ()=>{
+    if(fb) fb.style.display='block';
+    if(local && img.src !== local) img.src = local;
+  };
+
+  img.addEventListener('error', showFallback);
+  img.addEventListener('load', ()=>{ if(fb) fb.style.display='none'; });
+
+  setTimeout(()=>{
+    if(!img.complete || !img.naturalWidth) showFallback();
+  }, 4000);
+}
+
+/* =========================
+   جدول الفريق (ديناميكي)
+   - إذا زادت الصفوف: يقسم إلى عمودين داخل نفس الصفحة
+========================= */
+let teamData = [
+  {name:"", role:"", sign:""},
+  {name:"", role:"", sign:""},
+  {name:"", role:"", sign:""},
+  {name:"", role:"", sign:""},
+  {name:"", role:"", sign:""},
+  {name:"", role:"", sign:""},
+];
+
+const PER_COL = 6;     // ✅ بعد 6 صفوف يبدأ العمود الثاني (داخل نفس الصفحة)
+const MAX_ROWS = 12;   // ✅ سقف عملي داخل صفحة واحدة (عمودين × 6)
+
+function renderTeam(){
+  const grid = document.getElementById("teamGrid");
+  if(!grid) return;
+
+  // ضبط عدد الأعمدة
+  const cols = (teamData.length > PER_COL) ? 2 : 1;
+  grid.classList.toggle("onecol", cols === 1);
+
+  const col1 = teamData.slice(0, PER_COL);
+  const col2 = teamData.slice(PER_COL, PER_COL*2);
+
+  grid.innerHTML = "";
+  grid.appendChild(buildTeamTable(col1, 0));
+  if(cols === 2) grid.appendChild(buildTeamTable(col2, PER_COL));
+
+  save();
+}
+
+function buildTeamTable(rows, offset){
+  const box = document.createElement("div");
+  box.className = "team-box";
+
+  const inner = document.createElement("div");
+  inner.className = "inner";
+
+  const table = document.createElement("table");
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th style="width:34%;">الاسم</th>
+        <th style="width:33%;">الوظيفة</th>
+        <th style="width:33%;">التوقيع</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector("tbody");
+
+  rows.forEach((r, i) => {
+    const idx = offset + i;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td contenteditable="true" data-col="name" data-idx="${idx}">${escapeHtml(r.name)}</td>
+      <td contenteditable="true" data-col="role" data-idx="${idx}">${escapeHtml(r.role)}</td>
+      <td contenteditable="true" data-col="sign" data-idx="${idx}">${escapeHtml(r.sign)}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  // لو الصفوف أقل من PER_COL (لتوازن الشكل)
+  for(let k = rows.length; k < PER_COL; k++){
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td contenteditable="true" data-col="name" data-idx="${offset+k}"></td>
+      <td contenteditable="true" data-col="role" data-idx="${offset+k}"></td>
+      <td contenteditable="true" data-col="sign" data-idx="${offset+k}"></td>
+    `;
+    tbody.appendChild(tr);
+    // ضمان وجود عنصر في teamData لو المستخدم كتب
+    if(teamData[offset+k] == null) teamData[offset+k] = {name:"", role:"", sign:""};
+  }
+
+  // ربط إدخال التعديل
+  table.addEventListener("input", (e)=>{
+    const cell = e.target;
+    if(!cell || !cell.dataset) return;
+    const idx = Number(cell.dataset.idx);
+    const col = cell.dataset.col;
+    if(!Number.isFinite(idx) || !col) return;
+
+    // إذا المستخدم كتب في خلايا تمت إضافتها تلقائياً
+    if(!teamData[idx]) teamData[idx] = {name:"", role:"", sign:""};
+    teamData[idx][col] = cell.innerText.trim();
+    save();
+  });
+
+  inner.appendChild(table);
+  box.appendChild(inner);
+  return box;
+}
+
+function escapeHtml(str=""){
+  return String(str)
+    .replaceAll("&","&amp;")
+    .replaceAll("<","&lt;")
+    .replaceAll(">","&gt;");
+}
+
+/* أدوات التحكم */
+document.getElementById("btnAddRow")?.addEventListener("click", ()=>{
+  if(teamData.length >= MAX_ROWS){
+    alert("وصلت للحد الأقصى داخل صفحة واحدة (12 صف). إذا تبغى أكثر نعمل صفحة ثانية تلقائياً بنسخة لاحقة.");
+    return;
+  }
+  teamData.push({name:"", role:"", sign:""});
+  renderTeam();
+});
+
+document.getElementById("btnRemoveRow")?.addEventListener("click", ()=>{
+  if(teamData.length <= 1) return;
+  teamData.pop();
+  renderTeam();
+});
+
+document.getElementById("btnClearTeam")?.addEventListener("click", ()=>{
+  teamData = [{name:"", role:"", sign:""}];
+  renderTeam();
+});
+
+/* =========================
+   حفظ/استرجاع كل المحتوى
+========================= */
+function snap(){
+  const fields = [...document.querySelectorAll('[data-save="1"]')].map(el=>({
+    id: el.id,
+    html: el.innerHTML
+  }));
+  return { fields, team: teamData };
+}
+function save(){
+  try{ localStorage.setItem(STORAGE_KEY, JSON.stringify(snap())); }catch{}
+}
+function restore(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const s = JSON.parse(raw);
+
+    // الحقول
+    (s.fields || []).forEach(f=>{
+      const el = document.getElementById(f.id);
+      if(el) el.innerHTML = f.html;
+    });
+
+    // الفريق
+    if(Array.isArray(s.team) && s.team.length){
+      teamData = s.team.map(x=>({
+        name: x?.name || "",
+        role: x?.role || "",
+        sign: x?.sign || ""
+      }));
+      // تنظيف أي فراغات زائدة
+      teamData = teamData.slice(0, MAX_ROWS);
+    }
+  }catch{}
+}
+
+/* =========================
+   PDF + طباعة
+========================= */
+async function toDataURL(img,{maxSide=2400,q=0.95}={}){
+  await (img.decode?.().catch(()=>{}) || new Promise(r=>{
+    if(img.complete && img.naturalWidth) r();
+    else { img.addEventListener('load',r,{once:true}); img.addEventListener('error',r,{once:true}); }
+  }));
+  const w=img.naturalWidth,h=img.naturalHeight;
+  const s=Math.min(1,maxSide/Math.max(w,h));
+  const cw=Math.max(1,Math.floor(w*s)),ch=Math.max(1,Math.floor(h*s));
+  const c=document.createElement('canvas'); c.width=cw; c.height=ch;
+  c.getContext('2d',{alpha:false}).drawImage(img,0,0,cw,ch);
+  return c.toDataURL('image/jpeg',q);
+}
+
+async function makePdf(){
+  // محاولة تثبيت الهيدر (قد يفشل بسبب CORS)
+  const header = document.getElementById('headerPic');
+  if(header){
+    try{
+      if(header.src && /^https?:\/\//i.test(header.src)){
+        header.crossOrigin = 'anonymous';
+        const data = await toDataURL(header).catch(()=>null);
+        if(data) header.src = data;
+      }
+    }catch{}
+  }
+
+  // تجاهل أزرار/أدوات
+  const canvas = await html2canvas(document.getElementById('sheet'),{
+    scale: Math.min(window.devicePixelRatio||2, 2.4),
+    backgroundColor:'#ffffff',
+    useCORS:true,
+    allowTaint:false,
+    scrollX:0,
+    scrollY:-window.scrollY,
+    ignoreElements:(el)=> el?.classList?.contains('noprint') || el?.dataset?.nopdf==='true'
+  });
+
+  const img = canvas.toDataURL('image/jpeg', 0.96);
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({orientation:'p', unit:'mm', format:'a4'});
+
+  const W = pdf.internal.pageSize.getWidth();
+  const H = pdf.internal.pageSize.getHeight();
+  const h = (canvas.height * W) / canvas.width;
+  const fit = h <= H;
+  const drawW = fit ? W : (canvas.width * H) / canvas.height;
+  const drawH = fit ? h : H;
+
+  pdf.addImage(img,'JPEG',(W-drawW)/2,(H-drawH)/2,drawW,drawH,'','FAST');
+
+  const title = "استمارة مجتمع تعلم مهني";
+  const hijri = (document.getElementById('hijriDate')?.innerText || "").replace(/\s+/g,' ').trim();
+  pdf.save(`${title}${hijri ? " - " + hijri : ""}.pdf`);
+}
+
+function printNow(){
+  try{ save(); }catch{}
+  window.print();
+}
+
+/* =========================
+   تشغيل
+========================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  bindHeaderFallback();
+  restore();
+  renderTeam();
+
+  // حفظ عند أي تعديل في الحقول
+  document.querySelectorAll('[data-save="1"]').forEach(el=>{
+    ['input','keyup','blur'].forEach(evt=>{
+      el.addEventListener(evt, ()=> save());
+    });
+  });
+
+  document.getElementById("btnPdf")?.addEventListener("click", async ()=>{
+    try{ save(); await makePdf(); }
+    catch(e){ console.error(e); alert("تعذّر إنشاء PDF."); }
+  });
+
+  document.getElementById("btnPrint")?.addEventListener("click", ()=> printNow());
+});
+</script>
+</body>
+</html>
